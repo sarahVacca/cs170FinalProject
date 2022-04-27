@@ -122,7 +122,7 @@ int main(){
     while (1){
         printf("Scheme> ");
         strcpy(token, getToken());
-        S_Expression(0);
+        printCell(eval(S_Expression(0)));
     }
 }
 
