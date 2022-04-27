@@ -22,6 +22,10 @@ typedef struct conscell{
     struct conscell *cdr;
 }*Cell;
 
+struct SExp{
+      Cell * cell; 
+}*SExp;
+
 /****************************************************************
  Array of characters
  ------------------------------------
