@@ -44,11 +44,11 @@ Cell S_Expression();
 Cell parse();
 
 /****************************************************************
- Function: printCell()
+ Function: printSExp()
  ------------------------------------
  Takes the conscell representation of scheme code and prints it in
  S_Expression form
 */
-void printCell(Cell cell);
+void printSExp(Cell cell);
 
 #endif
