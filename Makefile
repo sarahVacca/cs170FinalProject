@@ -5,8 +5,14 @@
 
 all: scheme lextester
 
-scheme: parser.o lexer.o
-	gcc -o scheme parser.o lexer.o
+scheme: parser.o lexer.o evaltester.o eval.o
+	gcc -o scheme parser.o lexer.o evaltester.o eval.o
+
+eval.o: eval.c
+	gcc -c eval.c
+
+evaltester.o: evaltester.c
+	gcc -c evaltester.c
 
 lextester: lextester.o lexer.o
 	gcc -o lextester lextester.o lexer.o

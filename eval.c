@@ -2,7 +2,12 @@
 #include <string.h>
 #include <stdio.h>
 #include "parser.h"
-#include "parser.c"
+#include "eval.h"
+
+#ifndef EVAL
+#define EVAL
+
+#endif
 
 // Return the car of cell
 Cell car(Cell cell){

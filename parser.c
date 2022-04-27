@@ -3,14 +3,11 @@
 #include <string.h>
 #include "lexer.h"
 #include "parser.h"
+#include "eval.h"
 #ifndef PARSER
 #define PARSER
 
 #endif
-
-Cell S_Expression(int depth);
-char token[20];
-
 // printSExp takes a conscell "cell" and prints it in parenthesized form
 void printSExp(Cell cell){
     int depth = 1;
@@ -22,13 +19,13 @@ void printSExp(Cell cell){
                 printf("(");
             }
             depth = 1;
-            printCell(cell->car);
+            printSExp(cell->car);
             if(cell->cdr == NULL){
                 printf(")");
             }else{
                 printf(" ");
                 depth = 0;
-                printCell(cell->cdr);
+                printSExp(cell->cdr);
             }
         }
     }
@@ -36,7 +33,7 @@ void printSExp(Cell cell){
 
 // makeCell takes a char* named data and creates a new conscell structure and puts
 // data into the conscells char* also named data
-Cell makeCell(char *data){
+Cell makeCell(char* data){
     // Initialize a new conscell with the char data given from user as the data of the cell
     Cell cell = (Cell) malloc(sizeof(struct conscell));
     // If data is empty, make the cells data null
@@ -116,16 +113,8 @@ Cell S_Expression(int depth){
     return cell;
 }
 
-int main(){
-// call S_Expression
+Cell parse(){
     startTokens(20);
-    while (1){
-        printf("Scheme> ");
-        strcpy(token, getToken());
-        printCell(eval(S_Expression(0)));
-    }
+    strcpy(token, getToken());
+    return S_Expression(0);
 }
-
-
-
-
