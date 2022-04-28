@@ -10,25 +10,25 @@
 #endif
 
 // Return the car of cell
-SExp *car(SExp sexp){ 
+SExp car(SExp sexp){ 
     sexp->s = sexp->s->car;
     return sexp;
 }
 
 // Return the cdr of cell
-SExp *cdr(SExp sexp){
+SExp cdr(SExp sexp){
     sexp->s = sexp->s->cdr;
     return sexp;
 }
 
 // Return cell as it is
-SExp *quote(SExp sexp){
+SExp quote(SExp sexp){
     return sexp;
 }
 
 // Symbol? If there is data in cell, it must be a symbol
 // return true. If the data is null, return false.
-SExp *symbol(SExp sexp){
+SExp symbol(SExp sexp){
     if(sexp->s->data != NULL){
         sexp->s = makeCell("t");
         return sexp;
@@ -39,18 +39,19 @@ SExp *symbol(SExp sexp){
 }
 
 // Cons: Take one conscell and make it the car of the second conscell
-SExp *cons(SExp one, SExp two){
+SExp cons(SExp one, SExp two){
     // Make new cell
     SExp sexp;
     sexp->s = makeCell(NULL);
     SExp temp;
-    temp->s = car(one);
+    temp = car(one);
     SExp temptwo;
-    temptwo->s = car(two);
+    temptwo = car(two);
     // If they are both false, return a null cell
     if(temp->s->data != NULL && !strcmp(temp->s->data, "#f")){
         if(temptwo->s->data != NULL && !strcmp(temptwo->s->data, "#f")){
-            return makeCell(NULL);
+            temp->s = makeCell(NULL);
+            return temp;
         }
         // If only the first one is false, return the second one
         return two;
@@ -61,13 +62,13 @@ SExp *cons(SExp one, SExp two){
     }
     // If neither are false, set the car of new cell equal to the first cell
     // and the cdr of the new cell equal to the second cell
-    sexp->s->car = one;
-    sexp->s->cdr = two;
+    sexp->s->car = one->s;
+    sexp->s->cdr = two->s;
     // return the new cell
     return sexp;
 }
 
-SExp *copyCell(SExp sexp){
+SExp copyCell(SExp sexp){
     SExp copy;
     if(sexp->s == NULL){
         return NULL;
@@ -78,30 +79,31 @@ SExp *copyCell(SExp sexp){
     }
     copy->s = makeCell(NULL);
     if(car(sexp) != NULL){
-        copy->s->car = copyCell(car(sexp));
+        copy->s->car = copyCell(car(sexp))->s;
     }
     if(cdr(sexp) != NULL){
-        copy->s->cdr = copyCell(cdr(sexp));
+        copy->s->cdr = copyCell(cdr(sexp))->s;
     }
     return copy;
 }
-SExp *append(SExp one, SExp two){
+
+SExp append(SExp one, SExp two){
     SExp append;
-    append->s = copyCell(one);
+    append->s = copyCell(one)->s;
     if(cdr(append) != NULL){
         SExp temp;
-        temp->s = cdr(append);
+        temp->s = cdr(append)->s;
         while(cdr(temp) != NULL){
-            temp->s = cdr(temp);
+            temp->s = cdr(temp)->s;
         }
-        temp->s->cdr = copyCell(two);
+        temp->s->cdr = copyCell(two)->s;
     }else{
-        append->s->cdr = copyCell(two);
+        append->s->cdr = copyCell(two)->s;
     }
     return append;
 }
 
-SExp *null(SExp sexp){
+SExp null(SExp sexp){
     SExp temp;
     if(sexp->s->data != NULL){
         if(!strcmp(sexp->s->data, "#f")){
@@ -115,7 +117,7 @@ SExp *null(SExp sexp){
 /* Eval: takes a conscell and evaluates it based on the special functions that the user may have inputted
 such as car, cdr, quote, symbol?, and cons. Returns a conscell. 
 */
-SExp *eval(SExp sexp){
+SExp eval(SExp sexp){
     SExp rand;
     SExp temp = NULL;
     // First make sure the cell is not null

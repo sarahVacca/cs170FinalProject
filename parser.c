@@ -50,32 +50,32 @@ Cell makeCell(char* data){
     return cell;
 }
 
-/* S_Expression takes an integer that represents the "depth" or how many S_Expressions deep we are
+/* S_Helper takes an integer that represents the "depth" or how many S_Helpers deep we are
 We start of at 0 and each time the depth increases, that means have recursed into a new
-S_Expression. For the conscell representation, we want to initialize a new conscell with each 
-new S_Expression created */
-Cell S_Expression(int depth){
+S_Helper. For the conscell representation, we want to initialize a new conscell with each 
+new S_Helper created */
+Cell S_Helper(int depth){
     Cell cell, temp;
     /* Main part of function, handles what to do if the token is an open parenthesis
     Also handles recursive calls as an open parenthesis means the start of a new
-    S_Expression as defined by the grammar in part one */
+    S_Helper as defined by the grammar in part one */
     if (!strcmp(token, "(")) { // if token = (
         // make a new conscell (make it null because we don't know what is in it yet, all we know is we have a new conscell)
         cell = makeCell(NULL);
         // get the token
         strcpy(token, getToken());
         // The car of the cons cell will be the next token
-        cell->car = S_Expression(depth + 1);
+        cell->car = S_Helper(depth + 1);
         // Set a temporary conscell "temp" equal to our current conscell "cell"
         temp = cell;
-        // While we are in a new S_Expression...
+        // While we are in a new S_Helper...
         while (strcmp(token, ")")){ // if token does not equal )
             // Set our current conscell "temp" cdr equal to a new empty conscell
             temp->cdr = makeCell(NULL);
             // Then, set temp equal to its own cdr
             temp = temp->cdr;
             // Then make the car of temp (temp is the cdr of temp which is also cell) equal to the next token
-            temp->car = S_Expression(depth + 1); // Recursion
+            temp->car = S_Helper(depth + 1); // Recursion
         }
         temp->cdr = NULL;
         if(depth != 0){
@@ -113,8 +113,9 @@ Cell S_Expression(int depth){
     return cell;
 }
 
-Cell parse(){
-    startTokens(20);
+struct SExp *S_Expression(){
     strcpy(token, getToken());
-    return S_Expression(0);
+    struct SExp *sexp = malloc(sizeof(struct SExp));
+    sexp->s = S_Helper(0);
+    return sexp;
 }

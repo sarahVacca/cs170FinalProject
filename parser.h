@@ -38,7 +38,7 @@ char token[20];
  Takes scheme code and returns the underlying "cons-cell" structure
  represented by the code
 */
-Cell S_Expression();
+struct SExp *S_Expression();
 
 Cell makeCell();
 
@@ -47,7 +47,6 @@ Cell makeCell();
  ------------------------------------
  Runs the S_Expression function.
 */
-Cell parse();
 
 /****************************************************************
  Function: printSExp()
