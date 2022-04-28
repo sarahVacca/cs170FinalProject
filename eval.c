@@ -10,70 +10,126 @@
 #endif
 
 // Return the car of cell
-Cell car(Cell cell){
-    return cell->car;
+SExp *car(SExp sexp){ 
+    sexp->s = sexp->s->car;
+    return sexp;
 }
 
 // Return the cdr of cell
-Cell cdr(Cell cell){
-    return cell->cdr;
+SExp *cdr(SExp sexp){
+    sexp->s = sexp->s->cdr;
+    return sexp;
 }
 
 // Return cell as it is
-Cell quote(Cell cell){
-    return cell;
+SExp *quote(SExp sexp){
+    return sexp;
 }
 
 // Symbol? If there is data in cell, it must be a symbol
 // return true. If the data is null, return false.
-Cell symbol(Cell cell){
-    if(cell->data != NULL){
-        return makeCell("#t");
+SExp *symbol(SExp sexp){
+    if(sexp->s->data != NULL){
+        sexp->s = makeCell("t");
+        return sexp;
     }else{
-        return makeCell("#f");
+        sexp->s = makeCell("#f");
+        return sexp;
     }
 }
 
 // Cons: Take one conscell and make it the car of the second conscell
-Cell cons(Cell one, Cell two){
+SExp *cons(SExp one, SExp two){
     // Make new cell
-    Cell cell = makeCell(NULL);
+    SExp sexp;
+    sexp->s = makeCell(NULL);
+    SExp temp;
+    temp->s = car(one);
+    SExp temptwo;
+    temptwo->s = car(two);
     // If they are both false, return a null cell
-    if(car(one)->data != NULL && !strcmp(car(one)->data, "#f")){
-        if(car(two)->data != NULL && !strcmp(car(two)->data, "#f")){
+    if(temp->s->data != NULL && !strcmp(temp->s->data, "#f")){
+        if(temptwo->s->data != NULL && !strcmp(temptwo->s->data, "#f")){
             return makeCell(NULL);
         }
         // If only the first one is false, return the second one
         return two;
     }
     // If only the second one is false, return the first one
-    if(car(two)->data != NULL && !strcmp(car(two)->data, "#f")){
+    if(temptwo->s->data != NULL && !strcmp(temptwo->s->data, "#f")){
         return one;
     }
     // If neither are false, set the car of new cell equal to the first cell
     // and the cdr of the new cell equal to the second cell
-    cell->car = one;
-    cell->cdr = two;
+    sexp->s->car = one;
+    sexp->s->cdr = two;
     // return the new cell
-    return cell;
+    return sexp;
+}
+
+SExp *copyCell(SExp sexp){
+    SExp copy;
+    if(sexp->s == NULL){
+        return NULL;
+    }
+    if(sexp->s->data != NULL){
+        copy->s = makeCell(sexp->s->data);
+        return copy;
+    }
+    copy->s = makeCell(NULL);
+    if(car(sexp) != NULL){
+        copy->s->car = copyCell(car(sexp));
+    }
+    if(cdr(sexp) != NULL){
+        copy->s->cdr = copyCell(cdr(sexp));
+    }
+    return copy;
+}
+SExp *append(SExp one, SExp two){
+    SExp append;
+    append->s = copyCell(one);
+    if(cdr(append) != NULL){
+        SExp temp;
+        temp->s = cdr(append);
+        while(cdr(temp) != NULL){
+            temp->s = cdr(temp);
+        }
+        temp->s->cdr = copyCell(two);
+    }else{
+        append->s->cdr = copyCell(two);
+    }
+    return append;
+}
+
+SExp *null(SExp sexp){
+    SExp temp;
+    if(sexp->s->data != NULL){
+        if(!strcmp(sexp->s->data, "#f")){
+            temp->s = makeCell("#t");
+        }
+    }
+    temp->s = makeCell("#f");
+    return temp;
 }
 
 /* Eval: takes a conscell and evaluates it based on the special functions that the user may have inputted
 such as car, cdr, quote, symbol?, and cons. Returns a conscell. 
 */
-Cell eval(Cell cell){
-    Cell temp = NULL;
+SExp *eval(SExp sexp){
+    SExp rand;
+    SExp temp = NULL;
     // First make sure the cell is not null
-    if(cell != NULL){
+    if(sexp != NULL){
         // Then, make sure the car of the cell is not null
-        if(car(cell) != NULL){
+        if(car(sexp) != NULL){
             // Then, make sure the data of the car of the cell is not null
-            if(car(cell)->data != NULL){
-                char *data = car(cell)->data;
+            rand = car(sexp);
+            if((rand->s->data) != NULL){
+                char *data = rand->s->data;
                 /*Then, to be consistent with scheme, we have to evaluate the code "cdr first"
                 So, if the code is (car (cdr (a b c))), we have to find the cdr of (a b c) first,
                 and then the car of the cdr of (a b c). */
-                temp = eval(car(cdr(cell))); // This will recurse all the way to the first data that we need to eval
+                temp = eval(car(cdr(sexp))); // This will recurse all the way to the first data that we need to eval
                 // Now, we actually run the code for each function (car, cdr, etc)
                 if(!strcmp(data, "car")){
                     return car(temp);
@@ -84,20 +140,20 @@ Cell eval(Cell cell){
                 }else if(!strcmp(data, "symbol?")){
                     return symbol(temp);
                 }else if(!strcmp(data, "cons")){
-                    return cons(temp, eval(car(cdr(cdr(cell)))));
+                    return cons(temp, eval(car(cdr(cdr(sexp)))));
                 }
             }else{
                 // Else, if the data of the car of the cell is null...
-                printf("%s", cell->data);
-                eval(car(cell));
+                printf("%s", sexp->s->data);
+                eval(car(sexp));
                 // If there's no more concells to recurse into...
-                if(cell->cdr == NULL){
+                if(sexp->s->cdr == NULL){
                     // Return the cell
-                    return cell;
+                    return sexp;
                 }
             }
         }
         // If the cell is not null and we end up here, return the cell
-        return cell; 
+        return sexp; 
     }
 }

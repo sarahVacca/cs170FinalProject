@@ -17,13 +17,13 @@
  ------------------------------------
 */
 typedef struct conscell{
-    char* data;
+    char *data;
     struct conscell *car;
     struct conscell *cdr;
 }*Cell;
 
-struct SExp{
-      Cell * cell; 
+typedef struct SExp{
+    struct conscell *s; 
 }*SExp;
 
 /****************************************************************

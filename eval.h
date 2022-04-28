@@ -3,6 +3,6 @@
 #include <stdlib.h>
 #include "parser.h"
 
-Cell eval(Cell cell);
+SExp *eval(SExp sexp);
 
 #endif
