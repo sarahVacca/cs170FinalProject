@@ -68,6 +68,7 @@ SExp cons(SExp one, SExp two){
     return sexp;
 }
 
+// Copies one sexp into another
 SExp copyCell(SExp sexp){
     SExp copy;
     if(sexp->s == NULL){
@@ -87,6 +88,7 @@ SExp copyCell(SExp sexp){
     return copy;
 }
 
+// Scheme "append" functionality
 SExp append(SExp one, SExp two){
     SExp append;
     append->s = copyCell(one)->s;
@@ -103,6 +105,7 @@ SExp append(SExp one, SExp two){
     return append;
 }
 
+// Checks if an sexp is null
 SExp null(SExp sexp){
     SExp temp;
     if(sexp->s->data != NULL){
@@ -111,6 +114,88 @@ SExp null(SExp sexp){
         }
     }
     temp->s = makeCell("#f");
+    return temp;
+}
+
+// Checks to see if the data, car, and cdr of two sexps are
+// structurally equal
+SExp equalsHelper(SExp one, SExp two){
+    SExp sexp;
+    if((one->s->car == NULL && two->s->car != NULL) ||
+        (one->s->car != NULL && two->s->car == NULL) ||
+        (one->s->cdr == NULL && two->s->cdr != NULL) ||
+        (one->s->cdr != NULL && two->s->cdr == NULL) ||
+        (one->s->data == NULL && two->s->data != NULL) ||
+        (one->s->data != NULL && two->s->data == NULL)){
+            sexp->s = makeCell("f");
+    }else{
+        sexp->s = makeCell("t");
+    }
+    return sexp;
+}
+
+// Checks if two SExps are equal in every way
+SExp equals(SExp one, SExp two){
+    SExp temp;
+    SExp helper = equalsHelper(one, two);
+    // If helper returns false, automatically false
+    if(!strcmp(helper->s->data, "#f")){
+        temp->s = makeCell("f");
+        return temp;
+    }
+    // Then make sure the data of one and two is equal
+    if(one->s->data != NULL && two->s->data != NULL){
+        if(strcmp(one->s->data, two->s->data)){
+            temp->s = makeCell("#f");
+            return temp;
+        }
+    }
+    // Then, make sure the cars of one and two are equal
+    if(one->s->car != NULL && two->s->car != NULL){
+        helper = equalsHelper(car(one), car(two));
+        if(!strcmp(helper->s->data, "#f")){
+            temp->s = makeCell("f");
+            return temp;
+        }
+    }
+    // Then check if the cdrs of one and two are equal
+    if(one->s->cdr != NULL && two->s->cdr != NULL){
+        helper = equalsHelper(cdr(one), cdr(two));
+        if(!strcmp(helper->s->data, "#f")){
+            temp->s = makeCell("f");
+            return temp;
+        }
+    }
+    // If we get here, the two SExps are equal
+    temp->s = makeCell("#t");
+    return temp;
+}
+
+/* Scheme assoc functionality: 
+returns the pair that the symbol is a part of. SExp symbol is 
+the symbol and list is the S_Expression containing the list that 
+symbol and its pair are a part of */
+SExp assoc(SExp symbol, SExp list){
+    SExp temp;
+    // Go through every pair and find which one equals "symbol"
+    while(list != NULL){
+        if(car(list) != NULL){
+            SExp pair = car(list);
+            if(car(pair) != NULL){
+                SExp item = car(pair);
+                if(item->s->data != NULL){
+                    if(!strcmp(symbol, item->s->data)){
+                        // Symbol found, return the pair including symbol
+                        return pair;
+                    }
+                }
+            }
+        }
+        // Traverse through the list until symbol is found
+        list = cdr(list);
+    }
+    // Symbol not found, return #f
+    temp->s = makeCell("f");
     return temp;
 }
 
