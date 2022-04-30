@@ -199,6 +199,39 @@ SExp assoc(SExp symbol, SExp list){
     return temp;
 }
 
+/* Cond: Multiple Alternative conditional
+Like an if statement, first part is the condition and
+the second part is what you do if the condition is true
+*/
+SExp cond(SExp sexp){
+    // First make sure the list isn't null
+    if(sexp != NULL){
+        // Then, make sure there is a conditional part
+        SExp first = car(sexp);
+        if(first != NULL){
+            // Check if the car (the condition) is true
+            if(!strcmp(eval(car(first))->s, "#t")){
+                // Make sure there is a second part
+                if(cdr(first) != NULL){
+                    // Run the second part
+                    SExp secondOfFirst = cdr(first);
+                    return eval(car(secondOfFirst));
+                }
+            }
+        }
+        // Cond statements can have multiple parts to run after the conditional part
+        // Check if there's more of those
+        if(cdr(sexp) != NULL){
+            // Run cond again but with the cdr of sexp
+            return cond(cdr(sexp)); // Recursive call
+        }
+    }
+    // If we get here, and we haven't returned anything yet, return false
+    SExp new;
+    new->s = makeCell("#f");
+    return new;
+}
+
 /* Eval: takes a conscell and evaluates it based on the special functions that the user may have inputted
 such as car, cdr, quote, symbol?, and cons. Returns a conscell. 
 */
