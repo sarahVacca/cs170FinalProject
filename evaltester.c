@@ -6,13 +6,18 @@
 #include "eval.h"
 
 int main(){
+    char token[20];
     startTokens(20);
+    globalEnviornment = malloc(sizeof(struct SExp));
+    globalEnviornment->s = makeCell(NULL); 
 
     while(1){
         printf("Scheme> ");
-        struct SExp *sexp = S_Expression();
-        struct SExp *evalauated = eval(sexp);
-        printSExp(evalauated->s);
+        struct SExp *sexp = malloc(sizeof(struct SExp));
+        sexp = S_Expression();
+        struct SExp *evaluated = malloc(sizeof(struct SExp));
+        evaluated = eval(sexp);
+        printSExp(evaluated->s);
         printf("\n");
     }
 }

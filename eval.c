@@ -9,6 +9,7 @@
 
 #endif
 
+
 // Return the car of cell
 SExp car(SExp sexp){ 
     sexp->s = sexp->s->car;
@@ -41,11 +42,11 @@ SExp symbol(SExp sexp){
 // Cons: Take one conscell and make it the car of the second conscell
 SExp cons(SExp one, SExp two){
     // Make new cell
-    SExp sexp;
+    SExp sexp = malloc(sizeof(struct SExp)); 
     sexp->s = makeCell(NULL);
-    SExp temp;
+    SExp temp = malloc(sizeof(struct SExp));
     temp = car(one);
-    SExp temptwo;
+    SExp temptwo = malloc(sizeof(struct SExp));
     temptwo = car(two);
     // If they are both false, return a null cell
     if(temp->s->data != NULL && !strcmp(temp->s->data, "#f")){
@@ -70,7 +71,7 @@ SExp cons(SExp one, SExp two){
 
 // Copies one sexp into another
 SExp copyCell(SExp sexp){
-    SExp copy;
+    SExp copy = malloc(sizeof(struct SExp));
     if(sexp->s == NULL){
         return NULL;
     }
@@ -90,10 +91,10 @@ SExp copyCell(SExp sexp){
 
 // Scheme "append" functionality
 SExp append(SExp one, SExp two){
-    SExp append;
+    SExp append = malloc(sizeof(struct SExp));
     append->s = copyCell(one)->s;
     if(cdr(append) != NULL){
-        SExp temp;
+        SExp temp = malloc(sizeof(struct SExp));
         temp->s = cdr(append)->s;
         while(cdr(temp) != NULL){
             temp->s = cdr(temp)->s;
@@ -107,7 +108,7 @@ SExp append(SExp one, SExp two){
 
 // Checks if an sexp is null
 SExp null(SExp sexp){
-    SExp temp;
+    SExp temp = malloc(sizeof(struct SExp));
     if(sexp->s->data != NULL){
         if(!strcmp(sexp->s->data, "#f")){
             temp->s = makeCell("#t");
@@ -120,7 +121,7 @@ SExp null(SExp sexp){
 // Checks to see if the data, car, and cdr of two sexps are
 // structurally equal
 SExp equalsHelper(SExp one, SExp two){
-    SExp sexp;
+    SExp sexp = malloc(sizeof(struct SExp));
     if((one->s->car == NULL && two->s->car != NULL) ||
         (one->s->car != NULL && two->s->car == NULL) ||
         (one->s->cdr == NULL && two->s->cdr != NULL) ||
@@ -136,7 +137,7 @@ SExp equalsHelper(SExp one, SExp two){
 
 // Checks if two SExps are equal in every way
 SExp equals(SExp one, SExp two){
-    SExp temp;
+    SExp temp = malloc(sizeof(struct SExp));
     SExp helper = equalsHelper(one, two);
     // If helper returns false, automatically false
     if(!strcmp(helper->s->data, "#f")){
@@ -176,15 +177,17 @@ returns the pair that the symbol is a part of. SExp symbol is
 the symbol and list is the S_Expression containing the list that 
 symbol and its pair are a part of */
 SExp assoc(SExp symbol, SExp list){
-    SExp temp;
+    SExp temp = malloc(sizeof(struct SExp));
     // Go through every pair and find which one equals "symbol"
     while(list != NULL){
         if(car(list) != NULL){
-            SExp pair = car(list);
+            SExp pair = malloc(sizeof(struct SExp));
+            pair = car(list);
             if(car(pair) != NULL){
-                SExp item = car(pair);
+                SExp item = malloc(sizeof(struct SExp));
+                item = car(pair);
                 if(item->s->data != NULL){
-                    if(!strcmp(symbol, item->s->data)){
+                    if(!strcmp(symbol->s->data, item->s->data)){
                         // Symbol found, return the pair including symbol
                         return pair;
                     }
@@ -207,14 +210,16 @@ SExp cond(SExp sexp){
     // First make sure the list isn't null
     if(sexp != NULL){
         // Then, make sure there is a conditional part
-        SExp first = car(sexp);
+        SExp first = malloc(sizeof(struct SExp));
+        first = car(sexp);
         if(first != NULL){
             // Check if the car (the condition) is true
-            if(!strcmp(eval(car(first))->s, "#t")){
+            if(!strcmp(eval(car(first))->s->data, "#t")){
                 // Make sure there is a second part
                 if(cdr(first) != NULL){
                     // Run the second part
-                    SExp secondOfFirst = cdr(first);
+                    SExp secondOfFirst = malloc(sizeof(struct SExp));
+                    secondOfFirst = cdr(first);
                     return eval(car(secondOfFirst));
                 }
             }
@@ -227,17 +232,43 @@ SExp cond(SExp sexp){
         }
     }
     // If we get here, and we haven't returned anything yet, return false
-    SExp new;
+    SExp new = malloc(sizeof(struct SExp));
     new->s = makeCell("#f");
     return new;
+}
+
+/* Define handles define statements using the scheme functionality:
+When the user types a define statement, define will take the first item
+in the list and associate the second value in the list with the first
+item. It will also store the pair in the global enviornment so that 
+it can be referenced when needed.*/
+SExp define(SExp symbol, SExp value){
+    // Make an empty list
+    SExp empty;
+    empty = malloc(sizeof(struct SExp));
+    empty->s = makeCell("()");
+    // Cons the value with the empty list and store that in temp
+    SExp temp = cons(value, empty);
+    // Cons temp with the symbol and store that in pair
+    SExp pair = cons(symbol, temp);
+    // Add the pair to the global enviornment
+    globalEnviornment = malloc(sizeof(struct SExp));
+    globalEnviornment = cons(pair, globalEnviornment);
+    // Return the symbol
+    return symbol;
 }
 
 /* Eval: takes a conscell and evaluates it based on the special functions that the user may have inputted
 such as car, cdr, quote, symbol?, and cons. Returns a conscell. 
 */
 SExp eval(SExp sexp){
-    SExp rand;
-    SExp temp = NULL;
+    if(globalEnviornment == NULL){
+        globalEnviornment = malloc(sizeof(struct SExp));
+        globalEnviornment = makeCell("()");
+    }
+    SExp rand = malloc(sizeof(struct SExp));
+    SExp temp = malloc(sizeof(struct SExp));
+    temp = NULL;
     // First make sure the cell is not null
     if(sexp != NULL){
         // Then, make sure the car of the cell is not null
@@ -261,7 +292,35 @@ SExp eval(SExp sexp){
                     return symbol(temp);
                 }else if(!strcmp(data, "cons")){
                     return cons(temp, eval(car(cdr(cdr(sexp)))));
+                }else if(!strcmp(data, "append")){
+                    return append(temp, eval(car(cdr(cdr(sexp)))));
+                }else if(!strcmp(data, "null?")){
+                    return null(temp);
+                }else if(!strcmp(data, "equal?")){
+                    return equals(temp, eval(car(cdr(cdr(sexp)))));
+                }else if(!strcmp(data, "assoc")){
+                    return assoc(temp, eval(car(cdr(cdr(sexp)))));
+                }else if(!strcmp(data, "cond")){
+                    return cond(eval(cdr(sexp)));
+                }else if(!strcmp(data, "define")){
+                    return define(car(cdr(sexp)), eval(car(cdr(cdr(sexp)))));
                 }
+            }else if(strcmp(sexp->s->data, "")){
+                // If we input something that is a symbol in the global Enviornment...
+                SExp tool = malloc(sizeof(struct SExp));
+                Cell cell = malloc(sizeof(struct conscell));
+                tool->s = cell;
+                tool->s->car = NULL;
+                tool->s->cdr = NULL;
+                strcpy(cell->data, sexp->s->data);
+                SExp pair = malloc(sizeof(struct SExp));
+                pair = assoc(tool, globalEnviornment);
+                // Make sure the value associated with the symbol in the pair isn't null
+                if(pair->s->car != NULL){
+                    // Return the value associated with the symbol
+                    return car(cdr(pair));
+                }
+
             }else{
                 // Else, if the data of the car of the cell is null...
                 printf("%s", sexp->s->data);

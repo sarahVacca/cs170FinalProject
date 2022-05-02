@@ -16,6 +16,7 @@
  Struct: conscell
  ------------------------------------
 */
+SExp *globalEnviornment = NULL;
 typedef struct conscell{
     char *data;
     struct conscell *car;

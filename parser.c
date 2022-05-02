@@ -8,6 +8,10 @@
 #define PARSER
 
 #endif
+char token[20];
+
+SExp globalEnviornment = NULL;
+
 // printSExp takes a conscell "cell" and prints it in parenthesized form
 void printSExp(Cell cell){
     int depth = 1;
@@ -55,7 +59,8 @@ We start of at 0 and each time the depth increases, that means have recursed int
 S_Helper. For the conscell representation, we want to initialize a new conscell with each 
 new S_Helper created */
 Cell S_Helper(int depth){
-    Cell cell, temp;
+    Cell cell = malloc(sizeof(struct conscell));
+    Cell temp = malloc(sizeof(struct conscell));
     /* Main part of function, handles what to do if the token is an open parenthesis
     Also handles recursive calls as an open parenthesis means the start of a new
     S_Helper as defined by the grammar in part one */
@@ -114,6 +119,7 @@ Cell S_Helper(int depth){
 }
 
 struct SExp *S_Expression(){
+    startTokens(20);
     strcpy(token, getToken());
     struct SExp *sexp = malloc(sizeof(struct SExp));
     sexp->s = S_Helper(0);
