@@ -29,26 +29,6 @@ Note that, by contrast with definitions of symbols, the function name and the fo
               ((equal? E (car L)) L)
               (else (member E (cdr L)))))
              
-Part 5:
+Part 5: OPTIONAL
 https://mathcs.clarku.edu/~kebasye/cs170_2022/CS170HW/CS170Proj5.html
 Make your interpreter even nicer than it is now. Add the following capabilites:
-
-(1) Arithmetic functions: +, -, *. Note that addition and multiplication take any number of arguments (e.g., (+ 3 4 5) returns 12). This will require you to recognize when an atom is a number, to convert back and forth between strings and numbers, and probably will entail the most work in this assignment.
-
-(2) Logical functions: AND, OR and NOT. Note again that AND and OR take any number of arguments. AND returns the last value computed in its arguments, if they are all non-#f, and #f otherwise; OR returns the first non-#f argument if there is one, and #f otherwise. It's a short-circuit evaluation in both cases. NOT is just a synonym for NULL?.
-
-(3) Relational operators: <, >. Naturally, these apply only to numbers.
-
-(4) Other miscellaneous functions which you may not have added yet:
-
-list : Takes any number of arguments and returns a list of them. For example, (list 'a 'b 'c) returns (a b c).
-
-cadr, caddr, cadddr and caddddr : Returns the second, third, fourth.... element of a list, respectively.
-
-list? : A predicate that returns #t if the argument is a list, #f otherwise.
-
-number? : A predicate that returns #t if the argument is a number, #f otherwise.
-
-last : return the last item of a list.
-
-length : return the length of a list.
