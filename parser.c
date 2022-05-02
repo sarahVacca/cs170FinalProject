@@ -10,6 +10,8 @@
 #endif
 char token[20];
 
+// Global Enviornment is the S_Expression that will store all of the symbol
+// and function names and meanings that are defined by the user
 SExp globalEnviornment = NULL;
 
 // printSExp takes a conscell "cell" and prints it in parenthesized form
@@ -54,7 +56,7 @@ Cell makeCell(char* data){
     return cell;
 }
 
-/* S_Helper takes an integer that represents the "depth" or how many S_Helpers deep we are
+/* S_Helper (originally S_Expression) takes an integer that represents the "depth" or how many S_Helpers deep we are
 We start of at 0 and each time the depth increases, that means have recursed into a new
 S_Helper. For the conscell representation, we want to initialize a new conscell with each 
 new S_Helper created */
@@ -118,6 +120,7 @@ Cell S_Helper(int depth){
     return cell;
 }
 
+// Runs the functions
 struct SExp *S_Expression(){
     startTokens(20);
     strcpy(token, getToken());

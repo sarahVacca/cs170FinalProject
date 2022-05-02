@@ -5,6 +5,7 @@
 #include "parser.h"
 #include "eval.h"
 
+// Runs the parser
 int main(){
     char token[20];
     startTokens(20);

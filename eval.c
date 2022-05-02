@@ -243,7 +243,13 @@ in the list and associate the second value in the list with the first
 item. It will also store the pair in the global enviornment so that 
 it can be referenced when needed.*/
 SExp define(SExp symbol, SExp value){
-    // Make an empty list
+    // Check if the global enviornment is empty
+    if(globalEnviornment == NULL){
+        // If empty, set it equal to the empty list
+        globalEnviornment = malloc(sizeof(struct SExp));
+        globalEnviornment = makeCell("()");
+    }
+    // Make an empty S_Expression
     SExp empty;
     empty = malloc(sizeof(struct SExp));
     empty->s = makeCell("()");
@@ -252,23 +258,99 @@ SExp define(SExp symbol, SExp value){
     // Cons temp with the symbol and store that in pair
     SExp pair = cons(symbol, temp);
     // Add the pair to the global enviornment
-    globalEnviornment = malloc(sizeof(struct SExp));
     globalEnviornment = cons(pair, globalEnviornment);
     // Return the symbol
     return symbol;
 }
 
-/* Eval: takes a conscell and evaluates it based on the special functions that the user may have inputted
-such as car, cdr, quote, symbol?, and cons. Returns a conscell. 
-*/
-SExp eval(SExp sexp){
+// Determines if the S_Expression is a list, returns True or False
+// Not sure where to use this function...
+SExp isList(SExp sexp){
+    SExp list = malloc(sizeof(struct SExp));
+    if(sexp->s->car != NULL){
+        if(sexp->s->cdr != NULL){
+            list->s = makeCell("#t");
+        }
+    }else{
+        list->s = makeCell("#f");
+    }
+    return list; 
+}
+
+// funcDefine is a define function that handles user created functions
+SExp funcDefine(SExp func){
+    // First, make sure the global enviornment is not null
     if(globalEnviornment == NULL){
+        // If it is null, create a globalEnviornment equal to the empty list
         globalEnviornment = malloc(sizeof(struct SExp));
         globalEnviornment = makeCell("()");
     }
+    // Make an empty S_Expression
+    SExp empty = malloc(sizeof(struct SExp));
+    empty->s = makeCell("()"); // Empty list
+    // Store the name of the function in funcName
+    SExp funcName = malloc(sizeof(struct SExp));
+    funcName = car(car(cdr(func)));
+    // Create a list with the function and its name
+    SExp funcPair = malloc(sizeof(struct SExp));
+    funcPair = cons(funcName, cons(func, empty));
+    // Add the function to the global enviornment
+    globalEnviornment = cons(funcPair, globalEnviornment);
+    return funcName;
+}
+
+// Func Eval evaluates user created functions defined by the funcDefine function
+SExp funcEval(SExp func){
+    // First make sure the global enviornment is not null
+    if(globalEnviornment == NULL){
+        // If it is null, create a globalEnviornment equal to the empty list
+        globalEnviornment = malloc(sizeof(struct SExp));
+        globalEnviornment = makeCell("()");
+    }
+    // Make empty and temporary S_Expressions
+    SExp empty = malloc(sizeof(struct SExp));
+    empty->s = makeCell("()");
+    SExp temp = malloc(sizeof(struct SExp));
+    // Get the associated pair of the car of the user created function that is stored in the global enviornment
+    temp = assoc(car(func), globalEnviornment);
+    // If that exists,
+    if(!strcmp(temp->s->data, "#t")){
+        SExp rand = malloc(sizeof(struct SExp));
+        // Get the car of the cdr of the pair
+        rand = car(cdr(temp));
+        SExp one = malloc(sizeof(struct SExp));
+        // Get the car of the cdr of the car of the cdr of the pair
+        one = car(cdr(rand));
+        SExp two = malloc(sizeof(struct SExp));
+        // Get the car of the cdr of the cdr of the car of the cdr of the pair
+        two = car(cdr(cdr(rand)));
+        SExp three = malloc(sizeof(struct SExp));
+        // Cons one and (cons two and empty together) together
+        three = cons(car(one), cons(car(two), empty));
+        // Set temp to the cons of three and itself
+        temp = cons(three, temp);
+        SExp four = malloc(sizeof(struct SExp));
+        four = cons(car(cdr(one)), cons(car(cdr(two)), empty));
+        temp = cons(four, temp);
+        return funcEval(two);
+    }
+}
+
+/* Eval: takes a SExp and evaluates it based on the special functions that the user may have inputted
+such as car, cdr, quote, symbol?, and cons. Returns a sexp. 
+*/
+SExp eval(SExp sexp){
+    // First check if the globalEnviornment is null
+    if(globalEnviornment == NULL){
+        // If it is null, create a globalEnviornment equal to the empty list
+        globalEnviornment = malloc(sizeof(struct SExp));
+        globalEnviornment = makeCell("()");
+    }
+    // Temporary SExp's to hold values
     SExp rand = malloc(sizeof(struct SExp));
     SExp temp = malloc(sizeof(struct SExp));
     temp = NULL;
+    rand = NULL;
     // First make sure the cell is not null
     if(sexp != NULL){
         // Then, make sure the car of the cell is not null
@@ -303,7 +385,12 @@ SExp eval(SExp sexp){
                 }else if(!strcmp(data, "cond")){
                     return cond(eval(cdr(sexp)));
                 }else if(!strcmp(data, "define")){
-                    return define(car(cdr(sexp)), eval(car(cdr(cdr(sexp)))));
+                    // If defining a symbol
+                    if(car(car(cdr(temp))) == NULL){
+                        return define(car(cdr(sexp)), eval(car(cdr(cdr(sexp)))));
+                    }else{ // Defining a function
+                        return funcDefine(car(car(cdr(temp)))), funcEval(car(car(cdr(temp))));
+                    }
                 }
             }else if(strcmp(sexp->s->data, "")){
                 // If we input something that is a symbol in the global Enviornment...
